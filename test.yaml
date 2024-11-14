@@ -1,0 +1,121 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ss-dev
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ss-pv
+  namespace: ss-dev
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ss-efs-sc
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: fs-06046f9612c4b4aeb
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ss-pvc-efs
+  namespace: ss-dev
+spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: ss-efs-sc
+  resources:
+    requests:
+      storage: 5Gi
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ss-springboot-deploy
+  namespace: ss-dev
+  annotations:
+    kubernetes.io/change-cause: "Release 1.1 Version"
+  labels:
+    app: ss
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ss
+  template:
+    metadata:
+      labels:
+        app: ss
+    spec:
+      #serviceAccountName: eks-sa
+      automountServiceAccountToken: false
+      restartPolicy: Always
+      containers:
+      - image: 804480554088.dkr.ecr.ap-south-1.amazonaws.com/sstest
+        name: ss
+        imagePullPolicy: Always
+        env:
+        - name: TZ
+          value: America/New_York
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        volumeMounts:
+        - name: persistent-storage
+          mountPath: /efs
+      volumes:
+      - name: persistent-storage
+        persistentVolumeClaim:
+          claimName: ss-pvc-efs
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: ss-svc
+  namespace: ss-dev
+spec:
+  type: NodePort
+  selector:
+    app: ss
+  ports:
+  - port: 8080
+    protocol: TCP
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "ss-ingress"
+  namespace: "ss-dev"
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
+    alb.ingress.kubernetes.io/subnets: subnet-0d96d69c365371d74,
+      subnet-075a676b48275b670, subnet-0f5ef5871dc9df07e
+    #alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-south-1:804480554088:certificate/1bd71387-77a0-4f53-831e-d1c7bfb991bd"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    #alb.ingress.kubernetes.io/ssl-redirect: '443'
+    #alb.ingress.kubernetes.io/success-codes: 200,302
+  labels:
+    app: "ss-elb"
+spec:
+  ingressClassName: alb
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: "ss-svc"
+            port:
+              number: 8080
