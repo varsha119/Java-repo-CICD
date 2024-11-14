@@ -36,13 +36,13 @@ pipeline {
                 }
             }
         }
-		/*stage('Push to ECR and Deply to eks') {
+		stage('Push to ECR and Deply to eks') {
             agent {
                 label 'deploy'
             }
             steps {
                 script {
-                    sh 'curl -o jenkins-test-1.0.jar http://3.6.94.167:8081/artifactory/libs-release/com/example/jenkins-test/1.0/jenkins-test-1.0.jar'
+                    sh 'curl -o jenkins-test-2.0.jar http://13.127.33.64:8081/artifactory/libs-release/com/example/jenkins-test/2.0/jenkins-test-2.0.jar'
                     sh '''
                         aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin 804480554088.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
                         docker build -t sstest .
@@ -56,6 +56,6 @@ pipeline {
                     '''
                 }
             }
-        }*/
+        }
 }
 }
