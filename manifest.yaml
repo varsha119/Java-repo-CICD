@@ -7,7 +7,7 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ss-springboot
+  name: ss-springboot-deploy
   namespace: ss-dev
   annotations:
     kubernetes.io/change-cause: "Release 1.1 Version"
@@ -42,7 +42,7 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: ss
+  name: ss-svc
   namespace: ss-dev
 spec:
   type: NodePort
