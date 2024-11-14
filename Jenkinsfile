@@ -17,7 +17,6 @@ pipeline {
                  }
                 }
             }
-        }
         stage('Build Stage') {
             agent {
                 label 'jfrog'
