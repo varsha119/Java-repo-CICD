@@ -36,7 +36,7 @@ pipeline {
                 }
             }
         }
-		stage('Push to ECR and Deply to eks') {
+	stage('Push to ECR and Deply to eks') {
             agent {
                 label 'deploy'
             }
