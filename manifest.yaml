@@ -51,3 +51,32 @@ spec:
   ports:
   - port: 8080
     protocol: TCP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "ss-ingress"
+  namespace: "monitoring"
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
+    alb.ingress.kubernetes.io/subnets: subnet-0d96d69c365371d74, subnet-075a676b48275b670, subnet-0f5ef5871dc9df07e
+    #alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-south-1:804480554088:certificate/1bd71387-77a0-4f53-831e-d1c7bfb991bd"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    #alb.ingress.kubernetes.io/ssl-redirect: '443'
+    #alb.ingress.kubernetes.io/success-codes: 200,302
+  labels:
+    app: "ss-elb"
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: "ss-svc"
+                port:
+                  number: 8080
