@@ -44,10 +44,10 @@ pipeline {
                 script {
                     sh 'curl -o jenkins-test-2.0.jar http://13.235.238.224:8081/artifactory/libs-release/com/example/jenkins-test/2.0/jenkins-test-2.0.jar'
                     sh '''
-                        aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin 804480554088.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+                        aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 143106762218.dkr.ecr.ap-south-1.amazonaws.com
                         docker build -t sstest .
-                        docker tag sstest:latest 804480554088.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/sstest:latest
-                        docker push 804480554088.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/sstest:latest
+                        docker tag sstest:latest 143106762218.dkr.ecr.ap-south-1.amazonaws.com/sstest:latest
+                        docker push 143106762218.dkr.ecr.ap-south-1.amazonaws.com/sstest:latest
                         aws eks update-kubeconfig --region ap-south-1 --name cluster-eksctl
 			kubectl version --client
                         kubectl apply -f test.yaml
